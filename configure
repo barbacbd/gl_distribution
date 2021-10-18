@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Get the system that this is going to be configured on.
+# `linux` is used as a generic for ubuntu/centos/red hat.
+# `osx` is used for mac systems. Currently windows systems are
+# supported in code, but not with configuration.
+system="linux"
+if [ $# -eq 1 ] ; then
+    system=$1
+fi
+
+echo $system
+
+if [ "$system" = "osx" ] ; then
+    # install brew
+    echo "here"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    brew install glfw
+    brew install glew
+    
+
+elif [ "$system" = "linux" ] ; then
+    
+
+    release=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+    
+    # centos or red hat both using yum 
+    # Not checking fedora as a general base
+    if grep -q "Red Hat"  <<< "$release"  || grep -q "CentOS" <<< "$release" ; then
+	prog="yum"
+	if [ -f /usr/bin/dnf ] ; then
+	    prog="dnf"
+	fi
+	
+	# make sure that we can grab the latest updates
+	$prog clean expire-cache
+	$prog makecache
+	$prog update -y 
+	# devel versions will install non-devel as dependencies
+	$prog install -y gcc gcc-c++ mesa-libGL-devel glew-devel freeglut-devel
+	
+    else
+	# assuming ubuntu 
+	apt update -y
+	apt install -y build-essential
+	# install the opengl packages
+	apt-get install -y mesa-utils freeglut3-dev libglfw3-dev
+    fi
+else
+    echo "System Not supported"
+fi
