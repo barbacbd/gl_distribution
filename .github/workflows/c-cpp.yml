@@ -1,0 +1,19 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: centos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: configure
+      run: ./configure linux
+    - name: make
+      run: make
